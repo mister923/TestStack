@@ -1,0 +1,46 @@
+version: "3.8"
+services:
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    env_file:
+      - ./influxdb/config/influx-config.env
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    restart: unless-stopped
+
+  receiver:
+    build: ./receiver
+    container_name: receiver
+    depends_on:
+      - influxdb
+    environment:
+      - INFLUX_URL=http://influxdb:8086
+      - INFLUX_TOKEN=mytoken
+      - INFLUX_ORG=myorg
+      - INFLUX_BUCKET=strain_bucket
+      - UDP_PORT=12345
+    restart: unless-stopped
+
+  simulator:
+    build: ./simulator
+    container_name: simulator
+    depends_on:
+      - receiver
+    restart: unless-stopped
+
+volumes:
+  influxdb_data:
+  grafana_data:
