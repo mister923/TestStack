@@ -1,14 +1,17 @@
-# Grafana datasource configuration 
+# grafana/provisioning/datasources/influxdb-influxql.yaml
 apiVersion: 1
+
 datasources:
   - name: InfluxDB
     type: influxdb
     access: proxy
-    url: http://influxdb:8086
     isDefault: true
+    url: http://influxdb:8086
+    database: strain_bucket
     jsonData:
-      version: Flux
-      organization: myorg
-      defaultBucket: strain_bucket
+      httpMode: POST
+      version: InfluxQL
+      tags:
+        environment: production
     secureJsonData:
-      token: mytoken
+      password: mytoken
